@@ -1,0 +1,35 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main  # change to any branch you want to deploy from
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Create secrets.js file
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          EC2_INSTANCE_ID: ${{ secrets.EC2_INSTANCE_ID }}
+        run: |
+          mkdir -p public
+          echo "window.secrets = {" > public/secrets.js
+          echo "  AWS_ACCESS_KEY_ID: '${AWS_ACCESS_KEY_ID}'," >> public/secrets.js
+          echo "  AWS_SECRET_ACCESS_KEY: '${AWS_SECRET_ACCESS_KEY}'," >> public/secrets.js
+          echo "  AWS_REGION: '${AWS_REGION}'," >> public/secrets.js
+          echo "  EC2_INSTANCE_ID: '${EC2_INSTANCE_ID}'" >> public/secrets.js
+          echo "};" >> public/secrets.js
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
