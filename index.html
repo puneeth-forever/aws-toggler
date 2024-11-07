@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ADMIN INSTANCE CONTROL</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+<div class="container text-center mt-5">
+  <h1 class="mb-4">Control ADMIN SERVER</h1>
+  <div class="btn-group">
+    <button onclick="startInstance()" class="btn btn-success btn-lg">Start ADMIN SERVER</button>
+    <button onclick="stopInstance()" class="btn btn-danger btn-lg">Stop ADMIN SERVER</button>
+  </div>
+</div>
+
+<!-- Loading Spinner -->
+<div id="loading-spinner" class="d-none justify-content-center align-items-center" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5);">
+  <div class="spinner-border text-primary" role="status">
+    <span class="sr-only">Loading...</span>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="secrets.js"></script>
+<script src="https://sdk.amazonaws.com/js/aws-sdk-2.814.0.min.js"></script>
+
+<script>
+  AWS.config.update({
+    accessKeyId: window.secrets.AWS_ACCESS_KEY_ID,
+    secretAccessKey: window.secrets.AWS_SECRET_ACCESS_KEY,
+    region: window.secrets.AWS_REGION
+  });
+
+  const ec2 = new AWS.EC2();
+
+  function showLoadingSpinner(show) {
+    document.getElementById('loading-spinner').classList.toggle('d-flex', show);
+    document.getElementById('loading-spinner').classList.toggle('d-none', !show);
+  }
+
+  function startInstance() {
+    showLoadingSpinner(true);
+    const params = { InstanceIds: [window.secrets.EC2_INSTANCE_ID] };
+    ec2.startInstances(params, function(err, data) {
+      showLoadingSpinner(false);
+      if (err) alert("Error starting instance: " + err.message);
+      else alert("Instance started successfully!");
+    });
+  }
+
+  function stopInstance() {
+    showLoadingSpinner(true);
+    const params = { InstanceIds: [window.secrets.EC2_INSTANCE_ID] };
+    ec2.stopInstances(params, function(err, data) {
+      showLoadingSpinner(false);
+      if (err) alert("Error stopping instance: " + err.message);
+      else alert("Instance stopped successfully!");
+    });
+  }
+</script>
+
+</body>
+</html>
